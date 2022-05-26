@@ -12,24 +12,24 @@
         </header>
         <div class="list-container">
             <div class="input">
+                <div id="Arrow" class="arrow" onclick="selectAll()"></div>
                 <input id="TodoInput" class="add-input" type="text" placeholder="What needs to be done?">
             </div>
             <ul id="TodoList">
             </ul>
-            <div id="footer" class="footer hidden">
-                <div id="ItemsLeft"></div>
-                <div class="filters">
-                    <div>all</div>
-                    <div>Active</div>
-                    <div>Completed</div>
+            <div id="footer" class="footer">
+                <div id="ItemsLeft" class="items-left"></div>
+                <div id="filters" class="filters">
+                    <div class="filter" onclick="applyFilter('All')">All</div>
+                    <div class="filter" onclick="applyFilter('Active')">Active</div>
+                    <div class="filter" onclick="applyFilter('Completed')">Completed</div>
                 </div>
-                <div id="RemoveAllDone" class="hidden">Clear completed</div>
+                <div>
+                    <div id="RemoveAllDone" class="remove-all-done hidden">Clear completed</div>
+                </div>
             </div>
-
         </div>
-
     </div>
-
     <script src="main.js"></script>
 </body>
 </html>
