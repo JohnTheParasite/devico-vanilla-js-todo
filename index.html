@@ -6,6 +6,30 @@
     <link rel="stylesheet" href="main.css">
 </head>
 <body>
-
+    <div class="container">
+        <header>
+            <h1 class="header-label">todos</h1>
+        </header>
+        <div class="list-container">
+            <div class="input">
+                <div id="arrow" class="arrow"></div>
+                <input id="todoInput" class="add-input" type="text" placeholder="What needs to be done?">
+            </div>
+            <ul id="todoList">
+            </ul>
+            <div id="footer" class="footer">
+                <div id="itemsLeft" class="items-left"></div>
+                <div id="filters" class="filters">
+                    <div id="allFilter" class="filter">All</div>
+                    <div id="activeFilter" class="filter">Active</div>
+                    <div id="completedFilter" class="filter">Completed</div>
+                </div>
+                <div>
+                    <div id="removeAllDone" class="remove-all-done hidden">Clear completed</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="main.js"></script>
 </body>
 </html>
