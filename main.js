@@ -1,15 +1,19 @@
-let el_list = document.getElementById("TodoList");
-let el_addInput = document.getElementById("TodoInput");
-let el_removeAllDone = document.getElementById("RemoveAllDone");
+const elList = document.getElementById("todoList");
+const elAddInput = document.getElementById("todoInput");
+const elRemoveAllDone = document.getElementById("removeAllDone");
+const elAllFilter = document.getElementById("allFilter");
+const elActiveFilter = document.getElementById("activeFilter");
+const elCompletedFilter = document.getElementById("completedFilter");
+const elArrow = document.getElementById("arrow");
 let currentFilter = "All";
 
-el_addInput.addEventListener("keypress", (event) => {
+elAddInput.addEventListener("keypress", (event) => {
   if (event.key === "Enter") {
     createTodo();
   }
 });
 
-el_removeAllDone.addEventListener("click", () => {
+elRemoveAllDone.addEventListener("click", () => {
   let listItemsDone = document.querySelectorAll(".list-item.done");
   listItemsDone.forEach((el) => {
     el.remove();
@@ -17,8 +21,24 @@ el_removeAllDone.addEventListener("click", () => {
   refreshAppearance();
 });
 
+elAllFilter.addEventListener("click", () => {
+  applyFilter("All");
+});
+
+elActiveFilter.addEventListener("click", () => {
+  applyFilter("Active");
+});
+
+elCompletedFilter.addEventListener("click", () => {
+  applyFilter("Completed");
+});
+
+elArrow.addEventListener("click", () => {
+  selectAll();
+});
+
 function createTodo() {
-  let itemText = el_addInput.value.trim();
+  let itemText = elAddInput.value.trim();
   if (itemText === "") {
     return;
   }
@@ -50,9 +70,9 @@ function createTodo() {
   li.appendChild(itemName);
   li.appendChild(remove);
 
-  el_list.appendChild(li);
+  elList.appendChild(li);
 
-  el_addInput.value = "";
+  elAddInput.value = "";
   refreshAppearance();
 }
 
@@ -92,44 +112,42 @@ function refreshAppearance() {
 }
 
 function refreshFooter() {
-  let el_footer = document.getElementById("footer");
-  let el_itemsLeft = document.getElementById("ItemsLeft");
-  let el_removeAllDone = document.getElementById("RemoveAllDone");
+  const elFooter = document.getElementById("footer");
+  const elItemsLeft = document.getElementById("itemsLeft");
   let listItems = document.querySelectorAll(".list-item").length;
   let listItemsDone = document.querySelectorAll(".list-item.done").length;
 
   if (listItems === 0) {
-    el_footer.classList.add("hidden");
+    elFooter.classList.add("hidden");
   } else {
-    el_footer.classList.remove("hidden");
+    elFooter.classList.remove("hidden");
   }
 
   if (listItemsDone === 0) {
-    el_removeAllDone.classList.add("hidden");
+    elRemoveAllDone.classList.add("hidden");
   } else {
-    el_removeAllDone.classList.remove("hidden")
+    elRemoveAllDone.classList.remove("hidden")
   }
 
-  el_itemsLeft.innerText = listItems - listItemsDone + " items left"
+  elItemsLeft.innerText = listItems - listItemsDone + " items left"
 }
 
 function refreshArrow() {
-  let el_arrow = document.getElementById("Arrow");
   let listItems = document.querySelectorAll(".list-item").length;
   let listItemsDone = document.querySelectorAll(".list-item.done").length;
 
-  el_arrow.classList.remove("invisible");
-  el_arrow.classList.remove("darker");
+  elArrow.classList.remove("invisible");
+  elArrow.classList.remove("darker");
 
   if (listItems === 0) {
-    el_arrow.classList.add("invisible");
+    elArrow.classList.add("invisible");
   } else if (listItems === listItemsDone) {
-    el_arrow.classList.add("darker");
+    elArrow.classList.add("darker");
   }
 }
 
 function applyFilter(name) {
-  let filters = [].slice.call(document.getElementById("filters").children);
+  const filters = [].slice.call(document.getElementById("filters").children);
   if (!filters) {
     return
   }
@@ -147,14 +165,18 @@ function applyFilter(name) {
   let listItems = document.querySelectorAll(".list-item")
   let listItemsDone = document.querySelectorAll(".list-item.done")
 
-  listItems.forEach((el) => { el.classList.remove("hidden") });
+  listItems.forEach((el) => {
+    el.classList.remove("hidden")
+  });
 
   if (name === "Active") {
     listItemsDone.forEach((el) => {
       el.classList.add("hidden");
     })
   } else if (name === "Completed") {
-    listItems.forEach((el) => { el.classList.add("hidden") });
+    listItems.forEach((el) => {
+      el.classList.add("hidden")
+    });
     listItemsDone.forEach((el) => {
       el.classList.remove("hidden");
     })
