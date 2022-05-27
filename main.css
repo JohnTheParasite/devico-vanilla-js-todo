@@ -69,6 +69,15 @@ ul {
   outline: none;
 }
 
+.edit {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 13px 16px 13px 9px;
+  font-size: 24px;
+  outline: none;
+  margin-left: 53px;
+}
+
 .list-item {
   display: flex;
   align-items: center;
@@ -76,17 +85,23 @@ ul {
   border-bottom: 1px solid #D9D9D9;
 }
 
-.list-item.done .paragraph {
+.preview {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.list-item.done .preview .paragraph {
   text-decoration: line-through;
   color: #D9D9D9;
   transition: all 0.2s ease;
 }
 
-.list-item .checkbox {
+.list-item .preview .checkbox {
   appearance: none;
 }
 
-.list-item .checkbox::before {
+.list-item .preview .checkbox::before {
   content: '';
   font-size: 25px;
   display: flex;
@@ -99,7 +114,7 @@ ul {
   border-radius: 50%;
 }
 
-.list-item .checkbox:checked::before {
+.list-item .preview .checkbox:checked::before {
   content: '✓';
   color: #5cc0ae;
   border: 1px solid rgba(92, 192, 174, 0.35);

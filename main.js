@@ -46,6 +46,9 @@ function createTodo() {
   let li = document.createElement("li");
   li.classList.add("list-item")
 
+  let previewDiv = document.createElement("div");
+  previewDiv.classList.add("preview");
+
   let checkbox = document.createElement("input");
   checkbox.classList.add("checkbox");
   checkbox.type = "checkbox";
@@ -58,6 +61,15 @@ function createTodo() {
   let itemName = document.createElement("p");
   itemName.classList.add("paragraph");
   itemName.textContent = itemText;
+  itemName.addEventListener("dblclick", (event) => {
+    const elItem = event.target.closest(".list-item");
+    const elPreview = elItem.querySelector(".preview");
+    const elEdit = elItem.querySelector(".edit");
+
+    elPreview.classList.add("hidden");
+    elEdit.classList.remove("hidden");
+    elEdit.focus();
+  })
 
   let remove = document.createElement("div");
   remove.classList.add("remove");
@@ -66,9 +78,28 @@ function createTodo() {
     removeTodo(event.target);
   });
 
-  li.appendChild(checkbox);
-  li.appendChild(itemName);
-  li.appendChild(remove);
+  let editInput = document.createElement("input");
+  editInput.value = itemText;
+  editInput.classList.add("edit");
+  editInput.classList.add("hidden");
+  editInput.type = "text";
+  editInput.addEventListener("keypress", (event) => {
+    if (event.key === "Enter") {
+      const newItem = event.target.value.trim();
+      if (newItem === "") {
+        event.target.removeEventListener("focusout", editElement);
+      }
+      editElement(event);
+    }
+  })
+  editInput.addEventListener("focusout", editElement);
+
+  previewDiv.appendChild(checkbox);
+  previewDiv.appendChild(itemName);
+  previewDiv.appendChild(remove);
+
+  li.appendChild(previewDiv);
+  li.appendChild(editInput);
 
   elList.appendChild(li);
 
@@ -76,13 +107,33 @@ function createTodo() {
   refreshAppearance();
 }
 
+function editElement(event) {
+  const newItem = event.target.value.trim();
+  const elItem = event.target.closest(".list-item");
+
+  if (newItem === "") {
+    elItem.remove();
+    refreshAppearance();
+    return
+  }
+
+  const elPreview = elItem.querySelector(".preview");
+  const elEdit = elItem.querySelector(".edit");
+  const itemName = elItem.querySelector(".paragraph");
+
+  itemName.textContent = newItem;
+  elPreview.classList.remove("hidden");
+  elEdit.classList.add("hidden");
+}
+
 function removeTodo(target) {
-  target.parentElement.remove();
+  target.closest(".list-item").remove();
   refreshAppearance();
 }
 
 function toggleComplete(target) {
-  target.parentElement.classList.toggle("done");
+  let LiElement = target.closest(".list-item");
+  LiElement.classList.toggle("done");
   refreshAppearance();
 }
 
@@ -93,12 +144,14 @@ function selectAll() {
   if (listItemsDone.length < listItems.length) {
     listItems.forEach((el) => {
       el.classList.add("done");
-      el.firstChild.checked = true;
+      let checkbox = el.querySelector(".checkbox")
+      checkbox.checked = true;
     })
   } else {
     listItems.forEach((el) => {
       el.classList.remove("done")
-      el.firstChild.checked = false;
+      let checkbox = el.querySelector(".checkbox")
+      checkbox.checked = false;
     })
   }
 
