@@ -106,8 +106,7 @@ class App {
     const listItemsDone = this.todoList.itemList.filter((el) => el.item.done);
     listItemsDone.forEach((el) => {
       el.item.element.remove();
-      const indexToDelete = this.todoList.itemList.findIndex((item) => item.id === el.id);
-      this.todoList.itemList.splice(indexToDelete, 1);
+      this.todoList.removeTodo(el.id);
     });
     this.refreshAppearance();
   }
@@ -156,6 +155,14 @@ class TodoList {
     const item = new TodoItem(this, newId, this.addInput.value.trim());
     this.itemList.push({ id: newId, item: item })
   }
+
+  removeTodo(id) {
+    const indexToDelete = this.itemList.findIndex((item) => item.id === id);
+    if (indexToDelete >= 0) {
+      this.itemList.splice(indexToDelete, 1);
+    }
+    this.appInstance.refreshAppearance();
+  }
 }
 
 class TodoItem {
@@ -169,7 +176,6 @@ class TodoItem {
     this.previewElement = undefined;
     this.checkboxElement = undefined;
     this.itemNameElement = undefined;
-    this.removeButtonElement = undefined;
     this.editInputElement = undefined;
 
     this.create()
@@ -198,7 +204,7 @@ class TodoItem {
     let itemName = document.createElement("p");
     itemName.classList.add("paragraph");
     itemName.textContent = this.content;
-    itemName.addEventListener("dblclick", (event) => {
+    itemName.addEventListener("dblclick", () => {
       this.previewElement.classList.add("hidden");
       this.editInputElement.classList.remove("hidden");
       this.editInputElement.focus();
@@ -240,25 +246,20 @@ class TodoItem {
     this.previewElement = previewDiv;
     this.checkboxElement = checkbox;
     this.itemNameElement = itemName;
-    this.removeButtonElement = remove;
     this.editInputElement = editInput;
 
     this.listInstance.addInput.value = "";
   }
 
-  toggleComplete(target) {
+  toggleComplete() {
     this.element.classList.toggle("done");
     this.done = !this.done;
     this.listInstance.appInstance.refreshAppearance();
   }
 
-  removeTodo(target) {
+  removeTodo() {
     this.element.remove();
-    const indexToDelete = this.listInstance.itemList.findIndex((item) => item.id === this.id);
-    if (indexToDelete) {
-      this.listInstance.itemList.splice(indexToDelete, 1);
-    }
-    this.listInstance.appInstance.refreshAppearance();
+    this.listInstance.removeTodo(this.id);
   }
 
   editElement() {
