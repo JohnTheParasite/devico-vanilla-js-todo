@@ -41,7 +41,7 @@ class App {
 
   refreshFooter() {
     let listItems = this.todoList.itemList.length;
-    let listItemsDone = this.todoList.itemList.filter((el) => el.item.done).length;
+    let listItemsDone = this.todoList.itemList.filter((el) => el.done).length;
 
     if (listItems === 0) {
       this.footer.classList.add("hidden");
@@ -60,7 +60,7 @@ class App {
 
   refreshArrow() {
     let listItems = this.todoList.itemList.length;
-    let listItemsDone = this.todoList.itemList.filter((el) => el.item.done).length;
+    let listItemsDone = this.todoList.itemList.filter((el) => el.done).length;
 
     this.toggleArrowButton.classList.remove("invisible");
     this.toggleArrowButton.classList.remove("darker");
@@ -82,54 +82,46 @@ class App {
     this["el" + name + "Filter"].classList.add("active");
 
     let listItems = this.todoList.itemList;
-    let listItemsDone = this.todoList.itemList.filter((el) => el.item.done);
+    let listItemsDone = this.todoList.itemList.filter((el) => el.done);
 
     listItems.forEach((el) => {
-      el.item.element.classList.remove("hidden")
+      el.element.classList.remove("hidden")
     });
 
     if (name === "Active") {
       listItemsDone.forEach((el) => {
-        el.item.element.classList.add("hidden");
+        el.element.classList.add("hidden");
       })
     } else if (name === "Completed") {
       listItems.forEach((el) => {
-        el.item.element.classList.add("hidden")
+        el.element.classList.add("hidden")
       });
       listItemsDone.forEach((el) => {
-        el.item.element.classList.remove("hidden");
+        el.element.classList.remove("hidden");
       })
     }
   }
 
   removeAllDone() {
-    const listItemsDone = this.todoList.itemList.filter((el) => el.item.done);
+    const listItemsDone = this.todoList.itemList.filter((el) => el.done);
     listItemsDone.forEach((el) => {
-      el.item.element.remove();
-      this.todoList.removeTodo(el.id);
+      this.todoList.deleteItemFromData(el.id);
     });
-    this.refreshAppearance();
   }
 
   selectAll() {
     let listItems = this.todoList.itemList;
-    let listItemsDone = this.todoList.itemList.filter((el) => el.item.done);
+    let listItemsDone = this.todoList.itemList.filter((el) => el.done);
 
     if (listItemsDone.length < listItems.length) {
       listItems.forEach((el) => {
-        el.item.done = true;
-        el.item.element.classList.add("done");
-        el.item.checkboxElement.checked = true;
+        this.todoList.changeItemInData(el.id, true, el.content);
       })
     } else {
       listItems.forEach((el) => {
-        el.item.done = false;
-        el.item.element.classList.remove("done");
-        el.item.checkboxElement.checked = false;
+        this.todoList.changeItemInData(el.id, false, el.content);
       })
     }
-
-    this.refreshAppearance();
   }
 }
 
@@ -144,38 +136,88 @@ class TodoList {
 
     this.addInput.addEventListener("keypress", (event) => {
       if (event.key === "Enter") {
-        this.createTodo();
-        this.appInstance.refreshAppearance();
+        const newItem = { id: this.itemId++, done: false, content: this.addInput.value.trim() };
+        this.createTodo(newItem);
+        this.putItemToData(newItem);
       }
     });
+
+    this.renderList(true);
   }
 
-  createTodo() {
-    let newId = this.itemId++;
-    const item = new TodoItem(this, newId, this.addInput.value.trim());
-    this.itemList.push({ id: newId, item: item })
-  }
-
-  removeTodo(id) {
-    const indexToDelete = this.itemList.findIndex((item) => item.id === id);
-    if (indexToDelete >= 0) {
-      this.itemList.splice(indexToDelete, 1);
+  renderList(init = false) {
+    const todoItems = this.getData();
+    this.itemId = 1;
+    if (todoItems.length) {
+      this.itemId = Math.max(...todoItems.map(el => el.id)) + 1;
+      todoItems.forEach((el) => {
+        this.createTodo(el);
+      })
     }
-    this.appInstance.refreshAppearance();
+    if (!init) {
+      this.appInstance.refreshAppearance();
+    }
+  }
+
+  getData() {
+    const storageData = window.localStorage.getItem("todoItems");
+    return (storageData === null) ? [] : JSON.parse(storageData);
+  }
+
+  deleteItemFromData(id) {
+    const storageList = this.getData();
+    const indexToDelete = storageList.findIndex((item) => item.id === id);
+    if (indexToDelete >= 0) {
+      storageList.splice(indexToDelete, 1);
+    }
+    window.localStorage.setItem("todoItems", JSON.stringify(storageList));
+    this.clear();
+    this.renderList();
+  }
+
+  putItemToData(item) {
+    const storageList = this.getData();
+    storageList.push(item);
+    window.localStorage.setItem("todoItems", JSON.stringify(storageList));
+    this.clear();
+    this.renderList();
+  }
+
+  changeItemInData(id, done, content) {
+    const storageList = this.getData();
+    const item = storageList.find((item) => item.id === id);
+    if (item) {
+      item.id = id;
+      item.done = done;
+      item.content = content;
+    }
+    window.localStorage.setItem("todoItems", JSON.stringify(storageList));
+    this.clear();
+    this.renderList();
+  }
+
+  clear() {
+    this.itemList.forEach((el) => {
+      el.element.remove();
+    })
+    this.itemList = [];
+  }
+
+  createTodo(newTodo) {
+    const item = new TodoItem(this, newTodo.id, newTodo.done, newTodo.content);
+    this.itemList.push(item)
   }
 }
 
 class TodoItem {
 
-  constructor(list, itemId, content) {
+  constructor(list, id, done, content) {
     this.listInstance = list;
     this.content = content;
-    this.done = false;
-    this.id = itemId;
+    this.done = done;
+    this.id = id;
     this.element = undefined;
     this.previewElement = undefined;
-    this.checkboxElement = undefined;
-    this.itemNameElement = undefined;
     this.editInputElement = undefined;
 
     this.create()
@@ -195,6 +237,7 @@ class TodoItem {
     let checkbox = document.createElement("input");
     checkbox.classList.add("checkbox");
     checkbox.type = "checkbox";
+    checkbox.checked = this.done;
     checkbox.addEventListener("change", (event) => {
       if (event.target.tagName === "INPUT" && event.target.type === "checkbox") {
         this.toggleComplete(event.target);
@@ -213,8 +256,8 @@ class TodoItem {
     let remove = document.createElement("div");
     remove.classList.add("remove");
     remove.innerHTML = "×";
-    remove.addEventListener("click", (event) => {
-      this.removeTodo(event.target);
+    remove.addEventListener("click", () => {
+      this.listInstance.deleteItemFromData(this.id);
     });
 
     let editInput = document.createElement("input");
@@ -225,10 +268,7 @@ class TodoItem {
     const eventFunction = this.editElement.bind(this);
     editInput.addEventListener("keypress", (event) => {
       if (event.key === "Enter") {
-        const newItem = event.target.value.trim();
-        if (newItem === "") {
-          event.target.removeEventListener("focusout", eventFunction);
-        }
+        event.target.removeEventListener("focusout", eventFunction);
         this.editElement(event);
       }
     })
@@ -244,36 +284,34 @@ class TodoItem {
     this.listInstance.todoList.appendChild(li);
     this.element = li;
     this.previewElement = previewDiv;
-    this.checkboxElement = checkbox;
-    this.itemNameElement = itemName;
     this.editInputElement = editInput;
+
+    this.toggleDoneClass();
 
     this.listInstance.addInput.value = "";
   }
 
   toggleComplete() {
-    this.element.classList.toggle("done");
     this.done = !this.done;
-    this.listInstance.appInstance.refreshAppearance();
+    this.listInstance.changeItemInData(this.id, this.done, this.content);
   }
 
-  removeTodo() {
-    this.element.remove();
-    this.listInstance.removeTodo(this.id);
+  toggleDoneClass() {
+    if (this.done) {
+      this.element.classList.add("done");
+    } else {
+      this.element.classList.remove("done");
+    }
   }
 
   editElement() {
     this.content = this.editInputElement.value.trim();
 
     if (this.content === "") {
-      this.element.remove();
-      this.listInstance.appInstance.refreshAppearance();
+      this.listInstance.deleteItemFromData(this.id);
       return
     }
-
-    this.itemNameElement.textContent = this.content;
-    this.previewElement.classList.remove("hidden");
-    this.editInputElement.classList.add("hidden");
+    this.listInstance.changeItemInData(this.id, this.done, this.content);
   }
 }
 
